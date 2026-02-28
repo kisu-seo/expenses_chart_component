@@ -5,32 +5,54 @@
 The designs were created to the following widths:
 
 - Mobile: 375px
+- Tablet: 768px
 - Desktop: 1440px
 
 > 💡 These are just the design sizes. Ensure content is responsive and meets WCAG requirements by testing the full range of screen sizes from 320px to large screens.
 
 ## Colors
 
-### Primary
+### White
+- White: HEX #FFFFFF | RGB 255, 255, 255 | HSL 0°, 100%, 100%
 
-- Red 500: hsl(10, 79%, 65%)
-- Blue 300: hsl(186, 34%, 65%)
+### Black
+- Black: HEX #000000 | RGB 0, 0, 0 | HSL 0°, 0%, 0%
 
-### Neutral
+### Red
+- Red 500: HEX #EC755D | RGB 236, 117, 93 | HSL 10°, 79%, 65%
+- Red 300: HEX #FFA896 | RGB 255, 168, 150 | HSL 10°, 100%, 79%
+- Red 100: HEX #F9ECE2 | RGB 249, 236, 226 | HSL 26°, 66%, 93%
 
-- Brown 950: hsl(25, 47%, 15%)
-- Brown 400: hsl(28, 10%, 53%)
-- Red 100: hsl(26, 66%, 93%)
+### Brown
+- Brown 950: HEX #382314 | RGB 56, 35, 20 | HSL 25°, 47%, 15%
+- Brown 400: HEX #92857A | RGB 146, 133, 122 | HSL 28°, 10%, 53%
+
+### Blue
+- Blue 300: HEX #88BFC5 | RGB 136, 191, 197 | HSL 186°, 34%, 65%
+- Blue 200: HEX #BEE4E8 | RGB 190, 228, 232 | HSL 186°, 48%, 83%
 
 ## Typography
 
-### Body Copy
+### Font Family
+- [DM Sans](https://fonts.google.com/specimen/DM+Sans)
 
-- Font size: 18px
+### Text Presets
+- **Text Preset 1**: DM Sans Bold, 48px, 130% Line Height, 0px Letter Spacing
+- **Text Preset 2**: DM Sans Bold, 32px, 130% Line Height, 0px Letter Spacing
+- **Text Preset 3**: DM Sans Bold, 24px, 130% Line Height, 0px Letter Spacing
+- **Text Preset 4 (Bold)**: DM Sans Bold, 18px, 125% Line Height, 0px Letter Spacing
+- **Text Preset 4 (Regular)**: DM Sans Regular, 18px, 125% Line Height, 0px Letter Spacing
+- **Text Preset 5 (Bold)**: DM Sans Bold, 15px, 135% Line Height, 0px Letter Spacing
+- **Text Preset 5 (Regular)**: DM Sans Regular, 15px, 135% Line Height, 0px Letter Spacing
+- **Text Preset 6**: DM Sans Regular, 12px, 135% Line Height, 0px Letter Spacing
 
-### Font
+## Spacing
 
-- Family: [DM Sans](https://fonts.google.com/specimen/DM+Sans)
-- Weights: 400, 700
-
-> 💎 [Upgrade to Pro](https://www.frontendmentor.io/pro?ref=style-guide) for design file access to see all design details and get hands-on experience using a professional workflow with tools like Figma.
+- spacing-0: 0px
+- spacing-100: 8px
+- spacing-200: 16px
+- spacing-300: 24px
+- spacing-400: 32px
+- spacing-500: 40px
+- spacing-700: 56px
+- spacing-800: 64px

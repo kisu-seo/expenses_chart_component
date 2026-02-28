@@ -1,43 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
+<!-- lang="ko" : 스크린 리더(시각장애인용 화면 읽기 프로그램)에게
+       "이 페이지는 한국어 기반이에요"라고 알려주는 속성이에요. -->
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+  <meta charset="UTF-8" />
+  <!-- charset="UTF-8" : 한글, 영어, 이모지 등 세계의 모든 문자를
+         제대로 표시하기 위한 '번역 규칙'을 지정해요. -->
 
-  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
-  
-  <title>Frontend Mentor | Expenses chart component</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- viewport : 모바일에서 페이지가 작게 축소되지 않고
+         디바이스 화면 너비에 맞게 딱 맞게 보이도록 하는 설정이에요. -->
 
-  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
-  <style>
-    .attribution { font-size: 11px; text-align: center; }
-    .attribution a { color: hsl(228, 45%, 44%); }
-  </style>
+  <!-- SEO: 검색엔진(구글 등)이 이 페이지를 잘 이해하도록 돕는 메타 정보 -->
+  <meta name="description" content="지난 7일간의 지출 내역을 막대 차트로 시각화하는 컴포넌트입니다." />
+
+  <title>Expenses Chart Component</title>
+
+  <!-- Google Fonts: 스타일 가이드에 명시된 'DM Sans' 폰트를 불러와요. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- 우리가 작성할 CSS 파일을 연결해요. -->
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <!-- =============================================
+      <main> : 페이지의 핵심 콘텐츠를 감싸는 시맨틱 태그예요.
+      스크린 리더는 이 태그를 보고 "여기가 주요 내용이구나"라고 파악해요.
+      aria-label : 스크린 리더가 이 영역을 읽을 때 말해줄 이름을 지정해요.
+    ============================================= -->
+  <main class="app" aria-label="지출 차트 애플리케이션">
 
-  My balance
-  $921.48
+    <!-- ============================================
+        [카드 1] 잔액 카드 (Balance Card)
+        <header> : 이 컴포넌트의 '헤더(머리)' 역할을 해요.
+        배경이 붉은 색깔(Red 500)인 상단 카드에 해당해요.
+      ============================================ -->
+    <header class="balance-card" aria-label="내 잔액 정보">
 
-  Spending - Last 7 days
+      <!-- 잔액 정보 텍스트 묶음 -->
+      <div class="balance-card__info">
+        <!-- 라벨 텍스트: "My balance" -->
+        <p class="balance-card__label">My balance</p>
+        <!-- 실제 잔액 금액: 가장 눈에 띄는 큰 텍스트 -->
+        <p class="balance-card__amount">$921.48</p>
+      </div>
 
-  mon
-  tue
-  wed
-  thu
-  fri
-  sat
-  sun
+      <!-- 로고 이미지: 토글(동전 겹친) 아이콘 -->
+      <!-- aria-hidden="true" : 이건 단순 장식용 이미지라서
+             스크린 리더가 굳이 읽지 않아도 돼요. -->
+      <img class="balance-card__logo" src="images/logo.svg" alt="" aria-hidden="true" />
+    </header>
 
-  Total this month
-  $478.33
+    <!-- ============================================
+        [카드 2] 차트 카드 (Chart Card)
+        <section> : 독립적인 하나의 '섹션(구역)'을 나타내는 시맨틱 태그예요.
+        흰색 배경의 하단 카드에 해당해요.
+      ============================================ -->
+    <section class="chart-card" aria-label="지난 7일간 지출 차트">
 
-  +2.4%
-  from last month
-  
-  <div class="attribution">
-    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
-    Coded by <a href="#">Your Name Here</a>.
-  </div>
+      <!-- 차트 제목: 페이지의 핵심 주제이므로 h1 태그를 사용해요. -->
+      <h1 class="chart-card__title">Spending - Last 7 days</h1>
+
+      <!-- ==========================================
+          차트 영역 (Chart Area)
+          역할: 막대 그래프(Bar Chart)가 들어갈 공간이에요.
+          JavaScript가 이 안에 막대들을 동적으로 그려 넣을 거예요.
+        ========================================== -->
+      <div class="chart" aria-label="요일별 지출 막대 차트">
+
+        <!-- JavaScript가 fetch()로 data.json을 읽어온 뒤
+               이 자리에 막대(bar)들을 자동으로 채워 넣을 거예요.
+               지금은 구조를 보여주기 위한 '뼈대'만 남겨둡니다. -->
+
+        <!--
+            [나중에 JS가 만들어 줄 막대 구조 예시]
+
+            <div class="chart__bar-wrapper">
+              툴팁: 마우스를 올렸을 때 나타나는 말풍선
+              <div class="chart__tooltip" aria-hidden="true">$17.45</div>
+
+              막대 본체: height는 JS가 비율에 따라 계산해서 style로 넣어줄 거예요
+              <div class="chart__bar" style="height: 33%;" role="img" aria-label="월요일 지출: $17.45"></div>
+
+              요일 라벨 텍스트
+              <span class="chart__day">mon</span>
+            </div>
+          -->
+
+      </div>
+      <!-- // .chart 끝 -->
+
+      <!-- 구분선: 차트와 총액 정보를 시각적으로 나눠주는 선 -->
+      <hr class="chart-card__divider" aria-hidden="true" />
+
+      <!-- ==========================================
+          하단 정보 영역: 이번 달 총 지출 + 지난달 대비 변화율
+        ========================================== -->
+      <div class="summary" aria-label="이번 달 지출 요약">
+
+        <!-- 총 지출 정보 (왼쪽) -->
+        <div class="summary__total">
+          <p class="summary__label">Total this month</p>
+          <!-- 이번 달 총 지출 금액 -->
+          <p class="summary__amount">$478.33</p>
+        </div>
+
+        <!-- 지난달 대비 변화율 (오른쪽 하단) -->
+        <div class="summary__comparison" aria-label="지난달 대비 변화율">
+          <!-- 변화율 수치: 초록(양수)/빨강(음수) 색상으로 표현될 텍스트 -->
+          <p class="summary__percentage">+2.4%</p>
+          <!-- 보조 설명 텍스트 -->
+          <p class="summary__comparison-label">from last month</p>
+        </div>
+
+      </div>
+      <!-- // .summary 끝 -->
+
+    </section>
+    <!-- // .chart-card 끝 -->
+
+  </main>
+  <!-- // .app 끝 -->
+
+  <!-- JavaScript 파일 연결: 페이지 마지막에 두는 이유는,
+         HTML이 다 그려진 뒤에 JS가 실행되어야 요소를 찾을 수 있기 때문이에요.
+         (요리로 비유하면: 재료(HTML)가 준비된 후에 요리(JS)를 시작하는 것!) -->
+  <script src="script.js"></script>
 </body>
+
 </html>
