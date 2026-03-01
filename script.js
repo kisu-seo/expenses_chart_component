@@ -1,174 +1,46 @@
-/* =====================================================
-   script.js — 지출 차트 컴포넌트 자바스크립트
-   역할: data.json 데이터를 읽어 차트를 동적으로 그려주는 파일
-   흐름: 데이터 불러오기 → 오늘 요일 감지 → 막대 높이 계산 → DOM 생성
-   ===================================================== */
+/**
+ * @file script.js — 지출 차트 컴포넌트 자바스크립트
+ *
+ * @description
+ * data.json에서 요일별 지출 데이터를 불러와 막대 차트 DOM을 동적으로 생성한다.
+ * fetch 실패 시(로컬 file:// 환경 등) 내장된 FALLBACK_DATA로 차트를 렌더링한다.
+ *
+ * 실행 흐름:
+ *  1. loadChartData() — data.json fetch 시도 (성공 시 data, 실패 시 FALLBACK_DATA 전달)
+ *  2. renderChart(data) — 전달받은 데이터 배열로 막대 DOM을 생성하고 .chart에 주입
+ *
+ * 파일 의존성:
+ *  - index.html : .chart 컨테이너가 반드시 존재해야 한다.
+ *  - style.css  : --bar-max-height CSS 변수를 읽어 막대 최대 높이를 동기화한다.
+ *  - data.json  : { day: string, amount: number }[] 형태의 지출 데이터
+ */
 
 
-/* =================================================================
-  [1] 오늘 요일 감지 (Today Detection)
+/* -----------------------------------------------------------------
+   1단계: 오늘 요일 감지 (Today Detection)
 
-  비유: 달력을 보고 "오늘이 무슨 요일이지?" 하고 확인하는 과정이에요.
-  JavaScript의 Date 객체는 날짜/시간 정보를 담은 '시계 앱' 같은 도구예요.
-  ================================================================= */
+   Why: 사용자가 접속한 요일의 막대를 자동으로 강조하려면
+        현재 요일을 data.json의 day 필드 형식("mon", "tue" ...)과 맞춰야 한다.
 
-// 요일 인덱스(숫자)를 data.json의 영문 약자와 매칭시키는 배열(Array)이에요.
-// getDay()는 0(일요일) ~ 6(토요일) 순서로 숫자를 반환해요.
-// 배열의 순서를 그 숫자에 맞게 배치해두면, 인덱스로 바로 꺼낼 수 있어요!
+   Date.getDay()는 0(일)~6(토)의 정수를 반환한다.
+   DAY_NAMES 배열의 인덱스를 getDay() 반환값과 1:1 대응시켜
+   todayName ("mon", "wed" 등)을 단 한 줄로 추출한다.
+   ----------------------------------------------------------------- */
 const DAY_NAMES = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-//                  0      1      2      3      4      5      6
-//               (일)   (월)   (화)   (수)   (목)   (금)   (토)
+//                   0      1      2      3      4      5      6   ← getDay() 반환값
 
-// new Date() : 지금 이 순간의 날짜와 시간 정보를 담은 객체를 만들어요.
-const today = new Date();
-
-// .getDay() : 오늘이 몇 번째 요일인지 숫자(0~6)로 알려줘요.
-// 예를 들어 오늘이 일요일이면 0, 수요일이면 3을 반환해요.
-const todayIndex = today.getDay();
-
-// DAY_NAMES 배열에서 오늘의 숫자 인덱스에 해당하는 영문 약자를 꺼내요.
-// 예: todayIndex가 0이면 → "sun", 3이면 → "wed"
-const todayName = DAY_NAMES[todayIndex];
+const todayName = DAY_NAMES[new Date().getDay()];
 
 
-/* =================================================================
-  [2] 차트 생성 함수 (renderChart)
+/* -----------------------------------------------------------------
+   Fallback Data — fetch 실패 대비 내장 비상용 데이터
 
-  역할: 받아온 데이터 배열을 가지고 HTML 막대들을 만들어
-        .chart 영역 안에 집어넣는 '공장' 같은 함수예요.
-
-  매개변수(Parameter):
-    - data : data.json에서 읽어온 [{day, amount}, ...] 형태의 배열
-  ================================================================= */
-function renderChart(data) {
-    // --- 2-1. 차트를 넣을 컨테이너 요소를 HTML에서 찾아요 ---
-    // document.querySelector() : CSS 선택자로 요소를 하나 찾아주는 도구예요.
-    // 마치 "교실에서 1번 학생 찾아와" 하는 것처럼요.
-    const chartContainer = document.querySelector(".chart");
-
-    // 혹시 HTML에 .chart 요소가 없으면 에러를 출력하고 중단해요 (방어 코드)
-    if (!chartContainer) {
-        console.error("❌ .chart 요소를 찾을 수 없어요! HTML을 확인해 주세요.");
-        return; // 함수 실행을 여기서 멈춰요
-    }
-
-
-    // --- 2-2. 최댓값(Max Amount) 계산 ---
-    // 비유: 7명의 키를 재서 "이 중에 가장 큰 사람이 누구야?"를 찾는 것처럼요.
-    // Math.max() : 여러 숫자 중 가장 큰 값을 반환해요.
-    // ...data.map(item => item.amount) : 배열에서 amount 값만 쏙 뽑아서
-    //   펼쳐서(spread) Math.max에 넣어줘요.
-    const maxAmount = Math.max(...data.map((item) => item.amount));
-
-    // --- CSS 변수에서 차트 최대 높이(px) 읽어오기 ---
-    // 비유: "CSS에게 '막대 최대 높이가 몇 px야?' 하고 물어보는 것"이에요.
-    // getComputedStyle() : 현재 화면에 실제로 적용된 CSS 값을 읽어줘요.
-    // getPropertyValue() : CSS 변수(--bar-max-height)의 값을 꺼내줘요.
-    // parseInt() : "160px" 같은 문자열에서 숫자 160만 뽑아줘요.
-    const rootStyles = getComputedStyle(document.documentElement);
-    const BAR_MAX_HEIGHT = parseInt(
-        rootStyles.getPropertyValue("--bar-max-height"),
-        10 // 10진수로 변환
-    );
-    // 만약 CSS 변수 읽기에 실패했을 경우 기본값 160px 사용
-    const maxHeightPx = isNaN(BAR_MAX_HEIGHT) ? 160 : BAR_MAX_HEIGHT;
-
-
-    // --- 2-3. 각 요일 막대 생성 (forEach 반복문) ---
-    // forEach : 배열의 항목을 하나씩 꺼내서 같은 작업을 반복해요.
-    // 마치 7개의 빵 반죽을 하나씩 꺼내서 모양을 만드는 것처럼요.
-    data.forEach((item) => {
-        // item = { day: "mon", amount: 17.45 } 처럼 생긴 객체예요.
-
-        // --- 막대 높이 px 계산 ---
-        // ✅ 수정: 가장 큰 막대가 차트 컨테이너(.chart: 160px)를 벗어나지 않게 해요.
-        // 차트 높이에서 '요일 라벨 높이 + 여백' 공간(약 30px)을 뺀 나머지가 막대가 자랄 수 있는 진짜 높이예요!
-        const labelSpace = 24; // 요일 라벨과 간격(gap)이 차지하는 공간
-        const availableHeight = maxHeightPx - labelSpace;
-
-        // 공식: (현재 지출 ÷ 최대 지출) × 막대 가용 높이
-        const heightPx = (item.amount / maxAmount) * availableHeight;
-
-
-        // --- '오늘' 요일인지 판별 ---
-        // 현재 item의 day가 todayName과 같으면 true, 아니면 false
-        const isToday = item.day === todayName;
-
-
-        // --- DOM 요소 생성 ---
-        // document.createElement() : 새로운 HTML 태그를 메모리 안에 만들어요.
-        // 마치 "레고 블록 하나 꺼내기"와 같아요. 아직 화면에 붙이진 않았어요.
-
-        // [래퍼 div] : 툴팁 + 막대 + 요일 라벨을 담을 그릇
-        const barWrapper = document.createElement("div");
-        barWrapper.classList.add("chart__bar-wrapper"); // CSS 클래스 부착
-
-
-        // [툴팁 div] : 마우스를 올렸을 때 나타날 금액 말풍선
-        const tooltip = document.createElement("div");
-        tooltip.classList.add("chart__tooltip");
-        // aria-hidden="true" : 이 말풍선은 시각적 보조 요소이므로
-        //                       스크린 리더가 따로 읽지 않아도 돼요.
-        tooltip.setAttribute("aria-hidden", "true");
-        // 소수점 둘째 자리까지 고정해서 "$17.45" 형태로 표시해요.
-        tooltip.textContent = `$${item.amount.toFixed(2)}`;
-
-
-        // [막대 div] : 실제로 보이는 색깔 막대 본체
-        const bar = document.createElement("div");
-        bar.classList.add("chart__bar");
-
-        // 높이 설정: CSS의 height 속성을 직접 px로 지정해요.
-        // % 방식은 부모 요소의 명시적 높이가 없으면 0이 돼서, px로 직접 계산해요.
-        bar.style.height = `${heightPx}px`;
-
-        // '오늘' 요일이면 파란색 강조 클래스를 추가해요
-        if (isToday) {
-            bar.classList.add("chart__bar--today");
-        }
-
-        // 접근성(A11y): 막대에 role과 aria-label을 달아
-        //               스크린 리더가 "수요일 지출: $52.36"처럼 읽을 수 있게 해요.
-        bar.setAttribute("role", "img");
-        bar.setAttribute(
-            "aria-label",
-            `${item.day} 지출: $${item.amount.toFixed(2)}`
-        );
-
-
-        // [요일 라벨 span] : 막대 아래에 표시될 "mon", "tue" 등의 텍스트
-        const dayLabel = document.createElement("span");
-        dayLabel.classList.add("chart__day");
-        dayLabel.textContent = item.day;
-        // 스크린 리더가 막대(aria-label)에서 이미 요일 정보를 읽어줬으니
-        // 라벨 텍스트는 중복 읽기를 방지하려고 숨겨요.
-        dayLabel.setAttribute("aria-hidden", "true");
-
-
-        // --- 조립 순서 ---
-        // 비유: 레고 블록을 조립 설명서 순서대로 붙이는 것처럼요!
-        // 1. 래퍼에 툴팁 끼우기
-        barWrapper.appendChild(tooltip);
-        // 2. 래퍼에 막대 끼우기
-        barWrapper.appendChild(bar);
-        // 3. 래퍼에 요일 라벨 끼우기
-        barWrapper.appendChild(dayLabel);
-        // 4. 완성된 래퍼를 차트 컨테이너에 붙이기
-        chartContainer.appendChild(barWrapper);
-    });
-}
-
-
-/* =================================================================
-  [3] 비상용 데이터 (Fallback Data)
-
-  역할: fetch()가 실패할 때를 대비한 '보험 데이터'예요.
-  비유: 편의점에 재료가 없을 때를 대비해 집에 라면 하나 쟁여두는 것처럼요.
-
-  언제 필요하냐면?
-  - 파일을 로컬 서버 없이 index.html 을 더블클릭해서 열 때
-  - 브라우저 보안 정책이 file:// 프로토콜에서 fetch() 를 차단할 때
-  ================================================================= */
+   Why: 브라우저는 보안 정책(CORS)상 file:// 프로토콜에서 fetch()를 차단한다.
+        개발자가 로컬에서 index.html을 단순히 더블클릭해 열 경우가 이에 해당한다.
+        이때 catch 블록이 FALLBACK_DATA를 renderChart()에 전달해
+        서버 없이도 차트가 정상 렌더링되도록 보장한다.
+        (npx serve, VSCode Live Server 등 로컬 서버 사용 시엔 fetch가 정상 동작)
+   ----------------------------------------------------------------- */
 const FALLBACK_DATA = [
     { "day": "mon", "amount": 17.45 },
     { "day": "tue", "amount": 34.91 },
@@ -180,58 +52,199 @@ const FALLBACK_DATA = [
 ];
 
 
-/* =================================================================
-  [4] 데이터 불러오기 (Fetch API + 폴백)
+/**
+ * 데이터 배열을 기반으로 막대 차트 DOM을 생성해 .chart 컨테이너에 주입한다.
+ *
+ * @param {Array<{day: string, amount: number}>} data
+ *   data.json(또는 FALLBACK_DATA)에서 전달된 요일별 지출 배열.
+ *   예: [{ day: "mon", amount: 17.45 }, ...]
+ * @returns {void}
+ */
+function renderChart(data) {
+    const chartContainer = document.querySelector(".chart");
 
-  비유: 친구에게 "냉장고에서 재료 꺼내와!" 하고 부탁하는 것처럼요.
-  fetch()는 파일(또는 서버)에서 데이터를 가져오는 비동기 함수예요.
-  '비동기'란, 데이터가 도착할 때까지 기다리는 동안 다른 일도 할 수 있다는 뜻이에요.
+    // 방어 코드: HTML에 .chart가 없으면 appendChild가 런타임 에러를 발생시키므로 조기 종료
+    if (!chartContainer) {
+        console.error("❌ .chart 요소를 찾을 수 없어요! HTML을 확인해 주세요.");
+        return;
+    }
 
-  async/await : "이 작업이 끝날 때까지 기다렸다가 다음으로 넘어가"라는 표시예요.
-                요리로 비유하면 "국이 끓을 때까지 기다렸다가 간을 봐"와 같아요.
-  ================================================================= */
+
+    /* -----------------------------------------------------------------
+       2단계: 최대 지출액(maxAmount) 도출 및 막대 높이 계산
+
+       Why: 막대 높이를 amount 값 그대로 px로 쓰면 금액 단위에 의존하게 된다.
+            대신 "가장 큰 막대가 차트 최대 높이를 꽉 채우도록" 비율로 환산해야
+            어떤 데이터셋에서도 차트가 동일한 공간을 일관되게 채운다.
+
+       공식:
+         heightPx = (개별 지출 / 최대 지출) × availableHeight
+         → 최댓값 막대: (maxAmount / maxAmount) × availableHeight = 100% 높이
+         → 나머지 막대: 최댓값 대비 상대 비율로 높이 결정
+       ----------------------------------------------------------------- */
+
+    // 데이터 중 가장 큰 지출액 — 비율 계산의 분모이자 기준값
+    const maxAmount = Math.max(...data.map((item) => item.amount));
+
+    /*
+      CSS 변수 --bar-max-height 를 JS에서 직접 읽는 이유:
+      style.css와 script.js가 동일한 수치를 독립적으로 하드코딩하면
+      한 곳만 수정했을 때 불일치가 발생한다.
+      getComputedStyle로 런타임에 읽어 항상 CSS 변수와 동기화한다.
+    */
+    const rootStyles = getComputedStyle(document.documentElement);
+    const BAR_MAX_HEIGHT = parseInt(
+        rootStyles.getPropertyValue("--bar-max-height"),
+        10 // 10진수 파싱 — "160px" 문자열에서 숫자 160 추출
+    );
+    // CSS 변수 읽기 실패(NaN) 시 설계 수치 160px를 기본값으로 보장
+    const maxHeightPx = isNaN(BAR_MAX_HEIGHT) ? 160 : BAR_MAX_HEIGHT;
+
+
+    data.forEach((item) => {
+        /*
+          availableHeight 계산 — 요일 라벨(.chart__day) + gap이 차지하는 공간 제외
+
+          Why: .chart 컨테이너(160px)에는 막대 본체 외에 요일 라벨(12px)과
+               막대-라벨 간격(8px, gap)이 포함된다.
+               이를 감안하지 않으면 최댓값 막대가 컨테이너를 초과해 레이아웃이 깨진다.
+
+          태블릿(768px 이상)에서 labelSpace가 더 큰 이유:
+          요일 라벨 폰트가 12px → 15px로 커져 차지하는 실제 높이가 증가하기 때문.
+          (모바일: 24px, 태블릿: 28px)
+        */
+        const labelSpace = window.matchMedia("(min-width: 768px)").matches ? 28 : 24;
+        const availableHeight = maxHeightPx - labelSpace;
+
+        // 비율 공식: 개별 지출을 최대 지출 대비 백분율로 환산 후 가용 높이에 적용
+        const heightPx = (item.amount / maxAmount) * availableHeight;
+
+
+        /* -----------------------------------------------------------------
+           3단계: '오늘(Today)' 요일 강조 클래스 부여
+
+           todayName(모듈 상단에서 Date 객체로 추출)과 item.day를 비교.
+           일치하면 isToday = true → 막대에 .chart__bar--today 클래스 추가.
+           Result: 오늘 막대만 CSS의 --color-blue-300(청록색)으로 표시됨.
+           ----------------------------------------------------------------- */
+        const isToday = item.day === todayName;
+
+
+        /* -----------------------------------------------------------------
+           4단계: 동적 DOM 생성 및 차트 렌더링
+
+           하나의 막대 단위(barWrapper)는 세 자식으로 구성된다:
+             ┌ chart__bar-wrapper (position: relative — 툴팁 기준점)
+             │  ├ chart__tooltip   (aria-hidden: 시각 보조, 스크린 리더 제외)
+             │  ├ chart__bar       (role="img" + aria-label: 스크린 리더 전달)
+             │  └ chart__day span  (aria-hidden: bar aria-label과 중복 방지)
+             └──
+
+           접근성(A11y) 설계 근거:
+           - 툴팁(.chart__tooltip)은 마우스 호버 시에만 보이는 시각 보조 요소.
+             스크린 리더가 읽으면 금액이 두 번 읽혀 사용자가 혼란스러우므로 aria-hidden.
+           - 요일 라벨(.chart__day)도 bar의 aria-label에 요일 정보가 포함되어 있어 중복.
+             aria-hidden으로 스크린 리더에 한 번만 전달되도록 처리.
+           - 막대(.chart__bar)에만 role="img" + aria-label("wed 지출: $52.36")을 부여해
+             스크린 리더가 요일+금액 정보를 하나의 단위로 명확하게 읽는다.
+           ----------------------------------------------------------------- */
+
+        // [래퍼] 세 자식을 하나의 열(column)로 묶고, 툴팁의 위치 기준점 역할
+        const barWrapper = document.createElement("div");
+        barWrapper.classList.add("chart__bar-wrapper");
+
+        // [툴팁] 호버 시 표시되는 금액 말풍선 — 스크린 리더 읽기 제외
+        const tooltip = document.createElement("div");
+        tooltip.classList.add("chart__tooltip");
+        tooltip.setAttribute("aria-hidden", "true");
+        tooltip.textContent = `$${item.amount.toFixed(2)}`; // 소수점 2자리 고정: "$17.45"
+
+        // [막대] 높이는 % 방식을 쓸 수 없어 px로 직접 지정
+        // Why: CSS %는 부모에 명시적 height가 있어야 동작한다.
+        //      .chart__bar-wrapper는 height를 명시하지 않으므로 px로 직접 계산해 주입해야 한다.
+        const bar = document.createElement("div");
+        bar.classList.add("chart__bar");
+        bar.style.height = `${heightPx}px`;
+
+        if (isToday) {
+            bar.classList.add("chart__bar--today"); // CSS --color-blue-300 색상 적용
+        }
+
+        // 스크린 리더에 요일과 금액을 하나의 의미 단위로 전달
+        bar.setAttribute("role", "img");
+        bar.setAttribute(
+            "aria-label",
+            `${item.day} 지출: $${item.amount.toFixed(2)}`
+        );
+
+        // [요일 라벨] 시각적 표시용 — bar의 aria-label과 중복이므로 스크린 리더 제외
+        const dayLabel = document.createElement("span");
+        dayLabel.classList.add("chart__day");
+        dayLabel.textContent = item.day;
+        dayLabel.setAttribute("aria-hidden", "true");
+
+        // 조립 순서: 툴팁(위) → 막대(중간) → 요일 라벨(아래)
+        // CSS의 flex-direction: column과 대응하는 DOM 삽입 순서다.
+        barWrapper.appendChild(tooltip);
+        barWrapper.appendChild(bar);
+        barWrapper.appendChild(dayLabel);
+        chartContainer.appendChild(barWrapper);
+    });
+}
+
+
+/**
+ * data.json을 fetch로 불러와 renderChart를 호출한다.
+ * fetch 실패 시(file:// 프로토콜 CORS 차단 등) FALLBACK_DATA로 대체 렌더링한다.
+ *
+ * @async
+ * @returns {Promise<void>}
+ */
 async function loadChartData() {
     try {
-        // --- 4-1. data.json 파일 요청 ---
-        // fetch() : 지정한 경로의 파일을 가져오는 요청을 보내요.
-        // await : 파일을 완전히 받아올 때까지 기다려요.
+        /* -----------------------------------------------------------------
+           1단계: Fetch API를 통한 데이터 로드
+
+           await fetch() : 비동기 HTTP 요청으로 data.json 파일을 가져온다.
+           response.ok : HTTP 상태 코드가 200~299 범위일 때 true.
+           ok가 false이면 강제로 에러를 throw해 catch 블록으로 흐름을 넘긴다.
+           ----------------------------------------------------------------- */
         const response = await fetch("./data.json");
 
-        // --- 4-2. 요청 성공 여부 확인 ---
-        // response.ok : 파일을 정상적으로 받아오면 true, 실패하면 false예요.
         if (!response.ok) {
-            // 에러 메시지를 강제로 발생시켜 catch 블록으로 보내요.
             throw new Error(`데이터를 불러오지 못했어요. 상태 코드: ${response.status}`);
         }
 
-        // --- 4-3. JSON 형식으로 변환 ---
-        // 받아온 데이터는 아직 '날 것의 텍스트'예요.
-        // .json() 으로 JavaScript가 이해할 수 있는 배열/객체로 변환해요.
+        // 응답 본문을 JSON으로 파싱 — 완료될 때까지 await로 대기
         const data = await response.json();
 
-        // --- 4-4. 차트 그리기 ---
-        // 이제 데이터가 준비됐으니, 차트를 그리는 함수에 데이터를 건네줘요.
         console.log("✅ data.json 로드 성공! fetch() 데이터로 차트를 그립니다.");
         renderChart(data);
 
     } catch (error) {
-        // fetch()나 .json() 중 어디서든 에러가 나면 여기서 받아줘요.
-        // 📌 핵심 변경: 에러가 나도 포기하지 않고 비상용(FALLBACK) 데이터로 차트를 그려요!
-        // 비유: 편의점 재고가 없으면 집에 있는 라면으로 요리하는 것처럼요.
+        /*
+          fetch 또는 .json() 파싱 과정에서 에러 발생 시 실행되는 블록.
+
+          주된 실패 원인:
+          1. file:// 프로토콜: 브라우저 보안 정책이 로컬 파일 fetch를 차단 (CORS 에러)
+          2. 서버 에러: response.ok가 false여서 위에서 throw된 에러
+          3. 네트워크 단절: data.json 파일이 없거나 서버가 응답하지 않는 경우
+
+          Result: 어떤 이유로 fetch가 실패하더라도 FALLBACK_DATA로 차트를 렌더링해
+                  사용자가 빈 화면 대신 항상 완성된 차트를 볼 수 있도록 보장한다.
+        */
         console.warn("⚠️ fetch() 실패 (file:// 프로토콜 제한):", error.message);
         console.log("📦 내장 데이터(FALLBACK_DATA)로 차트를 대신 그립니다.");
 
-        // FALLBACK_DATA를 넘겨서 차트 렌더링을 진행해요.
         renderChart(FALLBACK_DATA);
     }
 }
 
 
-/* =================================================================
-  [5] 실행 진입점 (Entry Point)
+/* -----------------------------------------------------------------
+   실행 진입점 (Entry Point)
 
-  역할: 위에서 정의한 함수를 "실제로 시작!"시키는 스위치예요.
-  HTML 파일 맨 아래에 <script>를 뒀기 때문에 이 시점엔
-  이미 DOM(HTML 노드들)이 전부 준비된 상태예요.
-  ================================================================= */
+   <script>가 </body> 직전에 위치하므로 이 시점에 DOM은 이미 완성된 상태다.
+   따라서 DOMContentLoaded 이벤트 리스너나 defer 속성 없이 바로 호출해도 안전하다.
+   ----------------------------------------------------------------- */
 loadChartData();

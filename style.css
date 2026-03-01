@@ -1,70 +1,72 @@
 /* =====================================================
    style.css — 지출 차트 컴포넌트 스타일시트
-   작성 기준: style-guide.md 의 색상, 타이포그래피, 간격 토큰
+   구조: CSS 변수 → 리셋 → 기본 스타일 → 컴포넌트 → 세부 요소 → 미디어 쿼리
    ===================================================== */
 
 
 /* =================================================================
-  [1] CSS 변수 (Design Tokens)
-  역할: 건축에서 '설계 도면'과 같아요.
-  색상, 폰트 크기, 간격 값을 한 곳에서 관리하면
-  나중에 색상을 바꿀 때 이 한 곳만 수정하면 전체가 바뀌어요.
-  ================================================================= */
+   [1] CSS 변수 (Design Tokens)
+
+   style-guide.md의 색상·타이포그래피·간격 명세를 :root에 등록.
+   수치가 분산되지 않고 이 블록 하나만 수정하면 전체 스타일에 반영된다.
+   숫자(매직 넘버)가 코드 곳곳에 흩어지는 것을 방지하는 단일 진실 공급원(SSOT).
+   ================================================================= */
 :root {
     /* --- 색상 (Colors) --- */
-    /* 흰색 / 검정 */
     --color-white: #ffffff;
     --color-black: #000000;
 
-    /* 빨간 계열 (Red) : 막대 기본 색상, 상단 카드 배경 */
+    /* 빨간 계열: 막대 기본 색 · 상단 카드 배경 */
     --color-red-500: #ec755d;
-    /* 주요 강조 색: 막대 & 상단 카드 배경 */
+    /* 주요 강조색 — 막대 기본 색, 잔액 카드 배경 */
     --color-red-300: #ffa896;
-    /* 호버(마우스 올렸을 때) 효과 색 */
+    /* 호버 색 — 일반 막대에 마우스를 올렸을 때 */
     --color-red-100: #f9ece2;
-    /* 페이지 전체 배경 & 하단 카드 배경 */
+    /* 페이지 전체 배경, 구분선 색 */
 
-    /* 갈색 계열 (Brown) */
+    /* 갈색 계열: 텍스트 */
     --color-brown-950: #382314;
-    /* 제목, 금액 등 주요 텍스트 색 */
+    /* 주요 텍스트 — 제목, 금액, 강조 수치 */
     --color-brown-400: #92857a;
-    /* 보조 텍스트 색 (label 등) */
+    /* 보조 텍스트 — 레이블, 요일 */
 
-    /* 파란 계열 (Blue) : '오늘' 요일 막대 강조 색 */
+    /* 파란 계열: '오늘' 막대 강조 */
     --color-blue-300: #88bfc5;
-    /* 오늘 막대 기본 색 */
+    /* 오늘 막대 기본 색 — 일반 막대와 시각적으로 분리 */
     --color-blue-200: #bee4e8;
     /* 오늘 막대 호버 색 */
 
     /* --- 타이포그래피 (Typography) --- */
-    /* style-guide.md 의 Text Preset 을 변수로 등록 */
     --font-family: "DM Sans", sans-serif;
 
+    /*
+      폰트 크기 프리셋: style-guide.md의 Text Preset 번호와 1:1 대응.
+      preset 번호가 클수록 작은 텍스트다. (1=48px ~ 6=12px)
+    */
     --font-size-preset-1: 3rem;
-    /* 48px : 가장 큰 제목 */
+    /* 48px — 태블릿 총 지출액 */
     --font-size-preset-2: 2rem;
-    /* 32px */
+    /* 32px — 태블릿 제목, 모바일 총 지출액 */
     --font-size-preset-3: 1.5rem;
-    /* 24px */
+    /* 24px — 모바일 제목, 잔액 금액 */
     --font-size-preset-4: 1.125rem;
-    /* 18px */
+    /* 18px — 태블릿 레이블, 툴팁 금액 */
     --font-size-preset-5: 0.9375rem;
-    /* 15px */
+    /* 15px — 레이블, 요약 수치 */
     --font-size-preset-6: 0.75rem;
-    /* 12px : 가장 작은 텍스트 */
+    /* 12px — 요일 라벨 (가장 작은 텍스트) */
 
     --font-weight-bold: 700;
     --font-weight-regular: 400;
 
     --line-height-tight: 1.3;
-    /* 130% */
+    /* 130% — 큰 금액 텍스트: 줄 간격을 좁혀 덩어리감 유지 */
     --line-height-normal: 1.25;
     /* 125% */
     --line-height-loose: 1.35;
-    /* 135% */
+    /* 135% — 레이블·보조 텍스트: 여유있는 줄 간격으로 가독성 확보 */
 
-    /* --- 간격 (Spacing) --- */
-    /* style-guide.md 의 spacing 토큰을 그대로 등록 */
+    /* --- 간격 (Spacing) — style-guide.md 4px 배수 체계 --- */
     --spacing-0: 0px;
     --spacing-100: 8px;
     --spacing-200: 16px;
@@ -75,362 +77,339 @@
     --spacing-800: 64px;
 
     /* --- 레이아웃 (Layout) --- */
-    /* 카드의 둥근 모서리 정도 */
     --border-radius-card: 16px;
+    /* 현재 미사용(직접 수치 적용) — 추후 통일 대상 */
     --border-radius-bar: 4px;
+    /* 막대 위쪽 모서리: 날카롭지 않게 처리 */
 
-    /* 차트 막대의 최대 높이 (픽셀 단위) */
+    /*
+      --bar-max-height: 160px
+      디자인 시안 기준 수치. JS의 renderChart()가 이 값을 읽어
+      각 막대의 절대 높이를 역산한다. CSS와 JS가 이 값을 함께 참조하므로
+      변경 시 두 파일 모두 자동으로 반영된다.
+    */
     --bar-max-height: 160px;
 }
 
 
 /* =================================================================
-  [2] 초기화 (CSS Reset)
-  역할: 브라우저마다 기본으로 가진 여백, 테두리 등을 초기화해요.
-  마치 그림을 그리기 전 캔버스를 흰색으로 닦는 것과 같아요.
-  ================================================================= */
+   [2] 리셋 (CSS Reset)
+
+   크로스 브라우저 일관성 확보.
+   브라우저마다 기본 margin·padding이 달라 레이아웃이 틀어지는 문제를 방지.
+   box-sizing: border-box 통일로 padding·border가 width 계산에 포함되어
+   예측 가능한 크기 제어가 가능해진다.
+   ================================================================= */
 *,
 *::before,
 *::after {
-    /* 모든 요소의 박스 크기 계산 방식을 통일 */
-    /* (padding, border가 width 안에 포함되게 계산) */
     box-sizing: border-box;
     margin: 0;
-    /* 기본 바깥 여백 제거 */
     padding: 0;
-    /* 기본 안쪽 여백 제거 */
 }
 
 
 /* =================================================================
-  [3] 기본 (Base) 스타일
-  역할: 페이지 전체에 공통으로 적용되는 기본 스타일이에요.
-  ================================================================= */
+   [3] 기본 스타일 (Base)
+   ================================================================= */
 body {
-    /* 폰트: 구글 폰트에서 불러온 'DM Sans' 적용 */
     font-family: var(--font-family);
-    /* 페이지 전체 배경색: Red 100 (연한 살구색) */
     background-color: var(--color-red-100);
-    /* 기본 텍스트 색상: Brown 950 (어두운 갈색) */
     color: var(--color-brown-950);
 
-    /* 카드를 화면 정중앙에 배치하기 위한 설정 */
+    /*
+      Flexbox로 body를 전체 화면(100vh) 중앙 정렬 컨테이너로 활용.
+      .app(카드 그룹)이 뷰포트 정중앙에 떠 있는 카드 레이아웃을 만든다.
+      padding: 0 16px 은 작은 화면에서 카드가 화면 끝에 달라붙지 않도록
+      최소 여백을 보장한다.
+    */
     display: flex;
     flex-direction: column;
-    /* 위-아래로 쌓기 */
     align-items: center;
-    /* 가로 방향 중앙 정렬 */
     justify-content: center;
-    /* 세로 방향 중앙 정렬 */
     min-height: 100vh;
-    /* 화면 높이 전체를 사용 */
-    padding: 66px 16px;
-    /* 위아래는 66px, 좌우는 16px의 안쪽 여백(Padding)을 줘서 내용물이 화면 끝에 딱 붙지 않게 공간을 확보해요. */
-
+    padding: 0 16px;
 }
 
 
 /* =================================================================
-  [4] 앱 래퍼 (.app)
-  역할: 잔액 카드 + 차트 카드 전체를 감싸는 바깥 컨테이너예요.
-        카드들의 최대 너비를 제한해서 너무 넓어지지 않게 해요.
-  ================================================================= */
+   [4] 컴포넌트: 앱 래퍼 (.app)
+
+   잔액 카드(.balance-card)와 차트 카드(.chart-card) 두 카드를
+   세로로 쌓고 가로 너비를 제한하는 외부 컨테이너.
+   max-width: 375px 은 모바일 디자인 시안(375px 기준)에 맞춘 수치.
+   ================================================================= */
 .app {
-    /* 카드 전체의 최대 너비: 모바일 디자인 기준 375px */
     width: 100%;
     max-width: 375px;
-
-    /* 두 카드 사이의 간격 */
+    /* 디자인 시안 모바일 기준 너비 */
     display: flex;
     flex-direction: column;
     gap: var(--spacing-200);
-    /* 16px */
+    /* 16px — 두 카드 사이 간격 */
 }
 
 
 /* =================================================================
-  [5] 잔액 카드 (.balance-card)
-  역할: 상단의 붉은 배경 카드 스타일이에요.
-  ================================================================= */
+   [5] 컴포넌트: 잔액 카드 (.balance-card)
+   ================================================================= */
 .balance-card {
-    /* 배경색: Red 500 (따뜻한 붉은 색) */
     background-color: var(--color-red-500);
-    /* 모서리 둥글게 */
     border-radius: 10px;
-    /* 안쪽 여백 */
+    /* 디자인 시안 기준 — 태블릿에서 20px로 확대 */
     padding: 23px 22px;
-    /* 위아래 24px, 좌우 24px */
-
-    /* 내부 요소(텍스트 + 로고)를 양쪽 끝에 배치 */
+    /* 디자인 시안 기준 — 태블릿에서 26px 33.5px로 확대 */
     display: flex;
     justify-content: space-between;
-    /* 왼쪽: 텍스트, 오른쪽: 로고 */
+    /* 텍스트(왼쪽) · 로고(오른쪽) 양 끝 배치 */
     align-items: center;
-    /* 세로 방향 중앙 정렬 */
 }
 
-/* "My balance" 라벨 텍스트 */
+/* Text Preset 5 Regular — "My balance" 서브 레이블 */
 .balance-card__label {
-    /* Text Preset 5 Regular 적용 */
     font-size: var(--font-size-preset-5);
-    /* 15px */
     font-weight: var(--font-weight-regular);
     line-height: var(--line-height-loose);
-    /* 카드 배경이 어두우니 흰색으로 */
     color: var(--color-white);
-    /* 아래 금액 텍스트와의 간격 */
 }
 
-/* "$921.48" 금액 텍스트 */
+/* Text Preset 3 Bold — "$921.48" 주요 금액 */
 .balance-card__amount {
-    /* Text Preset 3 Bold 적용 */
     font-size: var(--font-size-preset-3);
-    /* 24px */
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-tight);
     color: var(--color-white);
 }
 
-/* 우측 토글/로고 이미지 */
 .balance-card__logo {
-    /* 이미지 크기 고정: 가로 60px, 세로 40px로 고정해요. */
     width: 60px;
+    /* 디자인 시안 기준 — 태블릿에서 72px로 확대 */
     height: 40px;
-    /* 이미지가 카드 내용에 맞게 줄어들지 않도록 */
+    /* 디자인 시안 기준 — 태블릿에서 48px로 확대 */
     flex-shrink: 0;
+    /* 카드가 좁아져도 로고가 찌그러지지 않도록 고정 */
 }
 
 
 /* =================================================================
-  [6] 차트 카드 (.chart-card)
-  역할: 하단의 흰색(크림색) 배경 카드 스타일이에요.
-  ================================================================= */
+   [6] 컴포넌트: 차트 카드 (.chart-card)
+   ================================================================= */
 .chart-card {
-    /* 배경색: 흰색에 가까운 크림색 */
     background-color: var(--color-white);
     border-radius: 10px;
-    /* 안쪽 여백: 카드 내부의 숨통을 만들어줘요 */
+    /* 디자인 시안 기준 — 태블릿에서 20px로 확대 */
     padding: 24px 20px;
-    /* 24px */
+    /* 디자인 시안 기준 — 태블릿에서 38px 40px로 확대 */
 }
 
-/* "Spending - Last 7 days" 제목 텍스트 */
+/* Text Preset 3 Bold — 모바일 기준 */
 .chart-card__title {
-    /* Text Preset 3 Bold 적용 */
     font-size: var(--font-size-preset-3);
-    /* 24px */
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-tight);
     color: var(--color-brown-950);
-    /* 아래 차트와의 간격: 시안처럼 넉넉하게 64px의 여백을 줘서 시원한 느낌을 줍니다. */
+    /*
+      margin-bottom: 56px (--spacing-700)
+      제목과 차트 사이의 넉넉한 여백으로 시안 기준 여유 공간 확보.
+      태블릿에서는 64px(--spacing-800)으로 증가.
+    */
     margin-bottom: var(--spacing-700);
-    /* 64px */
 }
 
-/* 제목과 차트 사이 구분선 */
 .chart-card__divider {
-    /* 기본 hr 테두리를 지우고 직접 그려요 */
     border: none;
     border-top: 2px solid var(--color-red-100);
-    /* 위아래 여백 */
+    /* 배경색과 같은 색으로 은은한 구분선 */
     margin: var(--spacing-300) 0;
-    /* 24px */
+    /* 24px — 모바일 기준. 태블릿에서 32px */
     border-radius: 1px;
 }
 
 
 /* =================================================================
-  [7] 차트 영역 (.chart)
-  역할: 막대(bar)들이 나란히 서 있을 공간이에요.
-  핵심 포인트: align-items: flex-end; 로 모든 막대가
-  바닥을 공통 기준선으로 삼아 아래부터 위로 자라요.
-  ================================================================= */
-.chart {
-    /* 막대들을 가로로 나란히 배치 */
-    display: flex;
-    /* 핵심! 바닥 정렬: 키가 다른 막대들이 모두 바닥에 발을 맞춰요 */
-    align-items: flex-end;
-    /* 막대들을 일정한 간격으로 배분 */
-    justify-content: space-between;
-    /* 차트 영역의 고정 높이: 제일 큰 막대가 이 높이를 꽉 채울 거예요 */
-    height: var(--bar-max-height);
-    /* 160px */
+   [7] 세부 요소: 차트 영역
 
-    /* 좌우 안쪽 여백: 양 끝 막대가 벽에 너무 딱 붙지 않도록 11.5px의 여유 공간을 줘요. */
+   세 클래스가 Flexbox 구조로 협력하는 방식:
+   ┌─ .chart (display: flex, align-items: flex-end) ─────────────────┐
+   │  ┌── .chart__bar-wrapper (display: flex, flex-direction: column) ┤
+   │  │   ┌ .chart__tooltip (position: absolute, 기본 숨김)           │
+   │  │   ├ .chart__bar (height: JS 주입, 아래에서 위로 성장)         │
+   │  │   └ .chart__day (요일 라벨)                                   │
+   │  └────────────────────────────────────────────────────────────── ┤
+   │  … (반복) …                                                      │
+   └──────────────────────────────────────────────────────────────────┘
+
+   핵심 설계:
+   - .chart에 align-items: flex-end 를 적용하면 높이가 다른 막대들이
+     모두 바닥 기준선을 공유하며 정렬된다. (막대가 바닥에서부터 위로 자람)
+   - .chart__bar-wrapper에 align-self: flex-end 를 별도 지정해
+     래퍼 자체도 .chart 바닥에 붙도록 이중으로 보장한다.
+   ================================================================= */
+
+.chart {
+    display: flex;
+    align-items: flex-end;
+    /* Why: 높이가 다른 막대들의 바닥 기준선 통일 */
+    justify-content: space-between;
+    height: var(--bar-max-height);
+    /* 160px — CSS 변수. JS도 이 값을 읽어 높이 계산 */
     padding: 0 11.5px;
+    /* 디자인 시안 기준: 양 끝 막대가 카드 테두리에 밀착하지 않도록 */
 }
 
-/* 막대 하나하나를 감싸는 래퍼 (막대 본체 + 요일 라벨) */
+/* 툴팁 + 막대 + 요일 라벨을 하나의 컬럼으로 묶는 래퍼 */
 .chart__bar-wrapper {
-    /* 막대와 요일 라벨을 세로로 쌓기 */
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* 가운데 정렬 */
     gap: var(--spacing-100);
-    /* 막대와 라벨 사이 8px 간격 */
-
-    /* 래퍼가 flex-end 정렬에서 바닥을 기준으로 쌓이도록 */
+    /* 8px — 막대와 요일 라벨 사이 간격 */
     align-self: flex-end;
-
-    /* 툴팁을 막대 위에 절대 위치로 올려야 해서 기준점 역할 */
+    /* Why: 부모의 flex-end 정렬을 래퍼 단위에서도 명시적으로 보장 */
     position: relative;
+    /* Why: 자식 툴팁(.chart__tooltip)이 absolute 위치를 잡는 기준점 */
 }
 
-/* 막대 본체 (.chart__bar) */
+/* 막대 본체 */
 .chart__bar {
-    /* 막대 너비 조정: 모바일 화면(375px)에서는 33px로 줄여서 막대 사이에 시원한 여백을 만들어요. */
+    /*
+      width: 33px — 디자인 시안 기준 모바일 막대 너비.
+      7개 막대 + 좌우 padding(11.5px × 2) + justify-content: space-between 간격이
+      max-width: 375px 카드 내에 시안대로 들어맞도록 산출된 수치.
+      태블릿(768px+)에서는 50px로 확대된다.
+    */
     width: 33px;
-    /* 높이는 JS가 계산해서 style="height: XX%" 로 채워줄 거예요 */
-
-    /* 기본 색상: Red 500 */
+    /* height 는 renderChart()가 비율 계산 후 style.height 로 px 단위로 주입 */
     background-color: var(--color-red-500);
-
-    /* 막대 위쪽 모서리를 둥글게 */
     border-radius: var(--border-radius-bar);
-
-    /* 마우스를 올렸을 때 부드럽게 색이 변하도록 트랜지션 추가 */
+    /* 4px — 막대 상단 모서리만 둥글게 */
     transition: background-color 0.2s ease;
-
-    /* 포인터 커서: 클릭/호버 가능함을 사용자에게 알려줌 */
+    /* 호버 색 변경을 부드럽게 처리 */
     cursor: pointer;
 }
 
-/* 막대에 마우스를 올렸을 때 (Hover State) */
-.chart__bar:hover {
-    /* 살짝 밝은 Red 300 으로 변경해서 "선택된 느낌"을 줘요 */
-    background-color: var(--color-red-300);
-}
-
-/* '오늘' 요일에 해당하는 막대 (JS가 이 클래스를 자동으로 추가해요) */
+/*
+  오늘 요일 막대 Modifier — BEM: .chart__bar--today
+  renderChart()가 오늘 요일과 일치하는 막대에 동적으로 추가한다.
+  일반 막대(red-500)와 색을 달리해 "오늘"이 어디인지 즉시 파악하게 한다.
+*/
 .chart__bar--today {
-    /* 오늘은 파란색(Cyan)으로 강조해요 */
     background-color: var(--color-blue-300);
 }
 
-/* '오늘' 막대에 마우스를 올렸을 때 */
-.chart__bar--today:hover {
-    background-color: var(--color-blue-200);
-}
-
-/* 요일 라벨 텍스트 (mon, tue, ...) */
+/* Text Preset 6 Regular — "mon", "tue" 등 요일 라벨 */
 .chart__day {
-    /* Text Preset 6 Regular 적용 */
     font-size: var(--font-size-preset-6);
-    /* 12px */
+    /* 12px — 작은 크기로 막대를 방해하지 않음 */
     font-weight: var(--font-weight-regular);
     line-height: var(--line-height-loose);
     color: var(--color-brown-400);
-    /* 보조 색상 */
-}
-
-/* 툴팁 (말풍선) : 마우스를 올렸을 때 막대 위에 나타나는 금액 표시 */
-.chart__tooltip {
-    /* 기본적으로 숨겨요 */
-    display: none;
-
-    /* 절대 위치: 부모(.chart__bar-wrapper) 기준으로 위에 떠 있게 해요 */
-    position: absolute;
-    /* 막대 위로 올라가도록 */
-    bottom: calc(100% + var(--spacing-100));
-    /* 막대 높이 + 8px 위 */
-    left: 50%;
-    transform: translateX(-50%);
-    /* 가로 방향으로 정확히 가운데 */
-
-    /* 말풍선 스타일 */
-    background-color: var(--color-brown-950);
-    color: var(--color-white);
-    font-size: var(--font-size-preset-6);
-    /* 12px */
-    font-weight: var(--font-weight-bold);
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    /* 텍스트가 줄바꿈되지 않도록 */
-
-    /* 툴팁이 다른 요소 위에 표시되도록 레이어 순서 설정 */
-    z-index: 10;
-}
-
-/* 막대에 마우스를 올리면 툴팁을 보여줘요 */
-/* .chart__bar-wrapper:hover 일 때 내부의 .chart__tooltip 을 표시 */
-.chart__bar-wrapper:hover .chart__tooltip {
-    display: block;
+    /* 보조 색상 — 강조 요소와 시각적 계층 분리 */
 }
 
 
 /* =================================================================
-  [8] 요약 정보 영역 (.summary)
-  역할: "Total this month $478.33" 과 "+2.4% from last month" 영역
-  ================================================================= */
-.summary {
-    /* 왼쪽: 총 지출, 오른쪽: 변화율을 양 끝에 배치 */
-    display: flex;
-    justify-content: space-between;
-    /* 세로 방향: 아래쪽 끝에 정렬 (두 요소의 높이가 다를 수 있어서) */
-    align-items: flex-end;
+   [8] 세부 요소: 툴팁 (.chart__tooltip)
+
+   기본 display: none 으로 숨기고, 데스크탑 hover 시에만 표시.
+   (터치 기기에서 hover 상태가 유지되는 UX 부작용 방지 — 미디어 쿼리 참고)
+   ================================================================= */
+.chart__tooltip {
+    display: none;
+    /* 기본 숨김 — 데스크탑 @media(min-width: 1024px)에서 hover 시 표시 */
+
+    /*
+      position: absolute + bottom: calc(100% + 8px)
+      Why: 부모(.chart__bar-wrapper) 기준으로 절대 위치를 잡아야
+      막대의 높이가 변해도 툴팁이 항상 막대 바로 위에 떠 있다.
+      bottom: 100% 는 래퍼 전체 높이 위에 붙고, +8px(spacing-100)로 간격을 추가.
+    */
+    position: absolute;
+    bottom: calc(100% + var(--spacing-100));
+    left: 50%;
+    transform: translateX(-50%);
+    /* 가로 중앙 정렬: 부모 기준 좌우 중심에 배치 */
+
+    background-color: var(--color-brown-950);
+    color: var(--color-white);
+
+    /* Text Preset 4 Bold — 금액이 레이블보다 크고 굵게: 한눈에 읽히는 강조 */
+    font-size: var(--font-size-preset-4);
+    font-weight: var(--font-weight-bold);
+
+    padding: var(--spacing-100);
+    /* 8px — 텍스트 주변 여백 */
+    border-radius: 5px;
+    white-space: nowrap;
+    /* 금액 텍스트가 줄바꿈되어 레이아웃이 깨지는 것을 방지 */
+    text-align: center;
+    z-index: 10;
+    /* Why: 인접한 래퍼들과 겹칠 경우를 대비해 최상단 레이어 보장 */
 }
 
-/* "Total this month" 라벨 */
+
+/* =================================================================
+   [9] 세부 요소: 요약 정보 (.summary)
+
+   "Total this month $478.33" (왼쪽) 과 "+2.4% from last month" (오른쪽)
+   두 그룹이 높이가 달라 align-items: flex-end로 바닥 기준선을 맞춘다.
+   ================================================================= */
+.summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    /* Why: 왼쪽(2줄)·오른쪽(2줄) 그룹의 바닥을 정렬 */
+}
+
+/* Text Preset 5 Regular — "Total this month" 서브 레이블 */
 .summary__label {
     font-size: var(--font-size-preset-5);
-    /* 15px */
     font-weight: var(--font-weight-regular);
     line-height: var(--line-height-loose);
     color: var(--color-brown-400);
-    /* 보조 색상 */
 }
 
-/* "$478.33" 금액 텍스트 */
+/* Text Preset 2 Bold — "$478.33" 주요 금액 수치 */
 .summary__amount {
-    /* Text Preset 2 Bold 적용: 잔액 카드 금액과 동일한 크기 */
     font-size: var(--font-size-preset-2);
-    /* 32px */
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-tight);
     color: var(--color-brown-950);
 }
 
-/* "+2.4%" 변화율 텍스트 */
+/* Text Preset 5 Bold — "+2.4%" 증감률 수치 */
 .summary__percentage {
     font-size: var(--font-size-preset-5);
-    /* 15px */
     font-weight: var(--font-weight-bold);
     line-height: var(--line-height-loose);
     color: var(--color-brown-950);
     text-align: right;
 }
 
-/* "from last month" 보조 설명 */
+/* Text Preset 5 Regular — "from last month" 보조 설명 */
 .summary__comparison-label {
     font-size: var(--font-size-preset-5);
-    /* 15px */
     font-weight: var(--font-weight-regular);
     color: var(--color-brown-400);
     text-align: right;
 }
 
-/* 변화율 + 설명 묶음 */
+/* 증감률 + 보조 설명을 오른쪽 정렬 컬럼으로 묶는 래퍼 */
 .summary__comparison {
-    /* 두 텍스트를 세로로 쌓기 */
     display: flex;
     flex-direction: column;
-    /* 오른쪽 정렬 */
     align-items: flex-end;
 }
 
 
 /* =================================================================
-  [9] 저작권 표시 (.attribution)
-  역할: 페이지 하단의 Frontend Mentor 저작권 문구
-  ================================================================= */
+   [10] 세부 요소: 저작권 (.attribution)
+   ================================================================= */
 .attribution {
     font-size: 11px;
     text-align: center;
     color: var(--color-brown-400);
     margin-top: var(--spacing-300);
-    /* 24px */
 }
 
 .attribution a {
@@ -439,34 +418,141 @@ body {
 
 
 /* =================================================================
-  [10] 반응형 (Responsive) 스타일
-  역할: 화면이 커질 때 레이아웃을 조정해요.
-  모바일(375px) → 태블릿(768px) → 데스크탑(1440px)
-  ================================================================= */
+   [11] 미디어 쿼리 (Responsive)
+
+   전략: Mobile First — 기본 스타일은 모바일(375px)을 기준으로 작성하고,
+   너비가 커질수록 덮어쓰기(override)로 확장한다.
+
+   브레이크포인트:
+   - 768px : 태블릿 — 카드 너비, 폰트 크기, 막대 너비 확대
+   - 1024px: 데스크탑 — 호버 효과와 툴팁 활성화
+   ================================================================= */
 
 /* 태블릿 이상 (768px ~) */
 @media (min-width: 768px) {
     .app {
-        /* 태블릿에서 카드 너비를 좀 더 넓게 허용 */
         max-width: 540px;
+        /* 디자인 시안 태블릿 기준 최대 너비 */
+        gap: var(--spacing-300);
+        /* 24px — 카드 간격 확대 */
+    }
+
+    .balance-card {
+        padding: 26px 33.5px;
+        /* 디자인 시안 태블릿 기준 */
+        border-radius: 20px;
+        /* 모바일 10px → 태블릿 20px: 크기가 커질수록 더 둥글게 */
+    }
+
+    /* Text Preset 4 Regular — 태블릿에서 레이블 크기 확대 */
+    .balance-card__label {
+        font-size: var(--font-size-preset-4);
+        font-weight: var(--font-weight-regular);
+    }
+
+    /* Text Preset 2 Bold — 태블릿에서 금액 크기 확대 */
+    .balance-card__amount {
+        font-size: var(--font-size-preset-2);
+    }
+
+    .balance-card__logo {
+        width: 72px;
+        /* 모바일 60px → 태블릿 72px: 카드 크기에 비례하여 확대 */
+        height: 48px;
+    }
+
+    .chart {
+        /*
+          padding: 0 4.88px — 태블릿에서 막대 너비가 50px로 넓어지면
+          7개 막대의 총 너비가 증가하므로 좌우 여백을 줄여 균형을 맞춘다.
+          (모바일: 11.5px → 태블릿: 4.88px)
+        */
+        padding: 0 4.88px;
     }
 
     .chart-card {
-        /* 내부 여백을 넉넉하게 키워요 */
-        padding: var(--spacing-400);
-        /* 32px */
+        padding: 38px 40px;
+        /* 디자인 시안 태블릿 기준 */
+        border-radius: 20px;
     }
 
+    /* Text Preset 2 Bold — 태블릿 제목 크기 확대 */
+    .chart-card__title {
+        font-size: var(--font-size-preset-2);
+        margin-bottom: var(--spacing-800);
+        /* 56px → 64px: 더 넓어진 카드에 맞게 여백 확대 */
+    }
+
+    /* 디자인 시안 기준: 태블릿에서 막대 너비 모바일 33px → 태블릿 50px */
     .chart__bar {
-        /* 태블릿/데스크탑에서는 다시 막대를 50px로 키워 도톰하게 만들어요. */
         width: 50px;
+    }
+
+    /* Text Preset 5 Regular — 태블릿에서 요일 라벨 크기 확대 */
+    .chart__day {
+        font-size: var(--font-size-preset-5);
+        font-weight: var(--font-weight-regular);
+    }
+
+    .chart-card__divider {
+        margin: var(--spacing-400) 0;
+        /* 24px → 32px: 더 넓은 카드에 맞게 구분선 여백 확대 */
+    }
+
+    /* Text Preset 4 Regular */
+    .summary__label {
+        font-size: var(--font-size-preset-4);
+        font-weight: var(--font-weight-regular);
+    }
+
+    /* Text Preset 1 Bold — 태블릿에서 총 지출액을 48px 최대 크기로 강조 */
+    .summary__amount {
+        font-size: var(--font-size-preset-1);
+    }
+
+    /* Text Preset 4 Bold */
+    .summary__percentage {
+        font-size: var(--font-size-preset-4);
+        font-weight: var(--font-weight-bold);
+    }
+
+    /* Text Preset 4 Regular */
+    .summary__comparison-label {
+        font-size: var(--font-size-preset-4);
+        font-weight: var(--font-weight-regular);
     }
 }
 
-/* 데스크탑 이상 (1440px ~) */
-@media (min-width: 1440px) {
+/* 데스크탑 이상 (1024px ~) */
+@media (min-width: 1024px) {
     .app {
-        /* 데스크탑에서 카드 너비를 최대로 */
-        max-width: 640px;
+        max-width: 540px;
+    }
+
+    .balance-card__label {
+        margin-bottom: var(--spacing-100);
+        /* 8px — 데스크탑에서 레이블·금액 사이 간격 추가 */
+    }
+
+    /*
+      호버(Hover) 및 툴팁 효과를 데스크탑에서만 활성화하는 이유:
+      터치 기기(모바일·태블릿)에서 :hover 는 탭(tap) 후 포커스가 유지되어
+      다른 요소를 탭하기 전까지 hover 상태가 고착된다.
+      이는 의도치 않은 툴팁 노출로 UX를 해치므로, pointer: fine 기기
+      (마우스 포인터가 있는 데스크탑)에서만 hover 효과를 허용한다.
+    */
+    .chart__bar:hover {
+        background-color: var(--color-red-300);
+        /* 일반 막대: red-500 → red-300 밝게 */
+    }
+
+    .chart__bar--today:hover {
+        background-color: var(--color-blue-200);
+        /* 오늘 막대: blue-300 → blue-200 밝게 */
+    }
+
+    /* 래퍼에 hover 시 자식 툴팁을 표시 — 부모 기준으로 트리거해 안정적인 hover 영역 확보 */
+    .chart__bar-wrapper:hover .chart__tooltip {
+        display: block;
     }
 }
