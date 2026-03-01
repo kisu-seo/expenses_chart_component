@@ -17,8 +17,8 @@
 
 ### Links
 
-- Solution URL: [Solution URL](https://github.com/kisu-seo/expenses_chart)
-- Live Site URL: [Live URL](https://kisu-seo.github.io/expenses_chart/)
+- Solution URL: [Solution URL](https://github.com/kisu-seo/expenses_chart_component)
+- Live Site URL: [Live URL](https://kisu-seo.github.io/expenses_chart_component/)
 
 ## My process
 
